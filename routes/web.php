@@ -91,10 +91,19 @@ $router->get('/genres/search/{query}', function ($query) use ($router) { // genr
     return response($genres);
 });
 
+/**
+ * BPM ENDPOINT
+ */
+
+$router->get('/bpm/{value}/songs', function ($value) use ($router) { // genres better be sanitized
+    $req = DB::select("SELECT performer, song, song_id FROM songs_data WHERE tempo = ?", [$value]);
+
+    return response($req);
+});
 
 
 /**
- * AVARAGE ENDPOINT
+ * AVERAGE ENDPOINT
  */
 
 
@@ -138,7 +147,7 @@ $router->get('/average', function () use ($router) { // genres better be sanitiz
     $sum['instrumentalness'] = $sum['instrumentalness'] / sizeof($req);
     $sum['liveness']     = $sum['liveness']     / sizeof($req);
     $sum['valence']      = $sum['valence']      / sizeof($req);
-    $sum['tempo']        = $sum['tempo']        / sizeof($req);
+    $sum['tempo']        = round($sum['tempo'] / sizeof($req), 0, PHP_ROUND_HALF_UP);
 
     // Most used key, integer to pitch class from https://en.wikipedia.org/wiki/Pitch_class 
     $count = array_count_values($sum['key']); // Counts the values in the array, returns associatve array
@@ -152,14 +161,14 @@ $router->get('/average', function () use ($router) { // genres better be sanitiz
 
 
 // $router->get('/debug', function() use ($router){
-//     $results = DB::select('SELECT genre, song_id FROM songs_data');
+//     $results = DB::select('SELECT tempo, song_id FROM songs_data');
 
 //     foreach($results as $sdata){ // normalize slug
 //         $updated = [
 //             ":id" => $sdata->song_id,
-//             ":genre"   => str_replace('\'', '"', $sdata->genre)
+//             ":tempo"   => round($sdata->tempo, 0, PHP_ROUND_HALF_UP)
 //         ];
-//         DB::update("UPDATE songs_data SET genre = :genre WHERE song_id = :id", $updated);
+//         DB::update("UPDATE songs_data SET tempo = :tempo WHERE song_id = :id", $updated);
 //     }
 // });
 
