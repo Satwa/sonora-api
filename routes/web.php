@@ -92,6 +92,65 @@ $router->get('/genres/search/{query}', function ($query) use ($router) { // genr
 });
 
 
+
+/**
+ * AVARAGE ENDPOINT
+ */
+
+
+$router->get('/average', function () use ($router) { // genres better be sanitized
+    $req = DB::select("SELECT * FROM songs_data GROUP BY song_id");
+
+    $sum = [
+        "duration"          => 0,
+        "danceability"      => 0,
+        "energy"            => 0,
+        "key"               => [],
+        "loudness"          => 0,
+        "speechiness"       => 0,
+        "acousticness"      => 0,
+        "instrumentalness"  => 0,
+        "liveness"          => 0,
+        "valence"           => 0,
+        "tempo"             => 0,
+    ];
+
+    foreach ($req as $song) {
+        $sum['duration']     += (int) $song->spotify_track_duration_ms;
+        $sum['danceability'] += (float) $song->danceability;
+        $sum['key'][] = (int) $song->key;
+        $sum['energy']       += (float) $song->energy;
+        $sum['loudness']     += (float) $song->loudness;
+        $sum['speechiness']  += (float) $song->speechiness;
+        $sum['acousticness'] += (float) $song->acousticness;
+        $sum['instrumentalness'] += (float) $song->instrumentalness;
+        $sum['liveness']     += (float) $song->liveness;
+        $sum['valence']      += (float) $song->valence;
+        $sum['tempo']        += (int) $song->tempo;
+    }
+
+    $sum['duration']     = $sum['duration']     / sizeof($req);
+    $sum['danceability'] = $sum['danceability'] / sizeof($req);
+    $sum['energy']       = $sum['energy']       / sizeof($req);
+    $sum['loudness']     = $sum['loudness']     / sizeof($req);
+    $sum['speechiness']  = $sum['speechiness']  / sizeof($req);
+    $sum['acousticness'] = $sum['acousticness'] / sizeof($req);
+    $sum['instrumentalness'] = $sum['instrumentalness'] / sizeof($req);
+    $sum['liveness']     = $sum['liveness']     / sizeof($req);
+    $sum['valence']      = $sum['valence']      / sizeof($req);
+    $sum['tempo']        = $sum['tempo']        / sizeof($req);
+
+    // Most used key, integer to pitch class from https://en.wikipedia.org/wiki/Pitch_class 
+    $count = array_count_values($sum['key']); // Counts the values in the array, returns associatve array
+    arsort($count); // Sort it from highest to lowest
+    $keys = array_keys($count); // Split the array so we can find the most occuring key
+    $sum['key'] = $keys[0];
+    
+    return response($sum);
+}); 
+
+
+
 // $router->get('/debug', function() use ($router){
 //     $results = DB::select('SELECT genre, song_id FROM songs_data');
 
