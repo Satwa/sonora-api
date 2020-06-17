@@ -10,6 +10,11 @@ Stack:
 - Lumen
 - [Dataset](https://data.world/kcmillersean/billboard-hot-100-1958-2017)
 
+Requirements:
+
+- SQLite
+- PHP >=7.3
+
 Setup:
 
 - Copy `.env.sample` to `.env` and configure accordingly
@@ -19,4 +24,16 @@ Setup:
 
 ### Endpoint Documentation
 
-Coming soon...
+`/songs`: list song_id, performer, name *as song* from all songs
+
+`/songs/{song_id}`: get all song data
+
+`/songs/search/{query}`: search a specific song by name or by performer
+
+`/genres`: list all genres
+
+`/genres/{genre}`: list song_id, performer, name *as song* from all songs from this genre
+
+`/songs/search/{query}`: search a specific genre by name
+
+`/average`: computed values
