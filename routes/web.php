@@ -13,16 +13,16 @@ function slugify($string, $delimiter = '-') {
     return $clean;
 }
 
+/**
+ * SONGS ENDPOINTS
+ */
+
 $router->get('/', function () use ($router) {
     return response(["success" => true, "status" => 200]);
 });
 
 $router->get('/songs', function () use ($router) {
     $results = DB::select("SELECT performer, song, song_id FROM songs GROUP BY song_id");
-
-    // foreach ($results as $song) {
-    //     $song->song_id = slugify(preg_replace('/(?<!\ )[A-Z]/', ' $0', $song->song_id));
-    // }
 
     return response($results);
 });
@@ -50,15 +50,57 @@ $router->get('/songs/search/{query}', function ($query) use ($router) {
 
 
 
+/**
+ * GENRES ENDPOINTS
+ */
+
+$router->get('/genres', function () use ($router) {
+    $req = DB::select("SELECT genre FROM songs_data GROUP BY song_id");
+    $genres = [];
+    foreach ($req as $genre) {
+        if(strlen($genre->genre) > 0){
+            $genres = array_merge($genres, json_decode($genre->genre));
+        }
+    }
+
+    return response($genres);
+});
+
+$router->get('/genres/{genre}/songs', function ($genre) use ($router) { // genres better be sanitized
+    $genre = str_replace('%20', ' ', $genre);
+    $req = DB::select("SELECT songs.*, songs_data.* FROM songs LEFT JOIN songs_data ON songs.song_id = songs_data.song_id WHERE songs_data.genre LIKE ?", ["%\"$genre\"%"]);
+
+    return response($req);
+});
+
+$router->get('/genres/search/{query}', function ($query) use ($router) { // genres better be sanitized
+    $genre = str_replace('%20', ' ', $query);
+    
+    $req = DB::select("SELECT genre FROM songs_data WHERE genre LIKE ? GROUP BY song_id ", ["%$genre%"]);
+    $genres = [];
+    foreach ($req as $genre) {
+        if(strlen($genre->genre) > 0){
+            $genres = array_merge($genres, json_decode($genre->genre));
+        }
+    }
+    $genres = array_unique($genres);
+    $genres = array_filter($genres, function($value) use ($query) {
+                  return strpos($value, $query) !== false;
+              });
+
+    return response($genres);
+});
+
+
 // $router->get('/debug', function() use ($router){
-//     $results = DB::select('SELECT * FROM songs_data');
+//     $results = DB::select('SELECT genre, song_id FROM songs_data');
 
 //     foreach($results as $sdata){ // normalize slug
 //         $updated = [
-//             ":song_id" => slugify(preg_replace('/(?<!\ )[A-Z]/', ' $0', $sdata->song_id)),
-//             ":id"      => $sdata->id
+//             ":id" => $sdata->song_id,
+//             ":genre"   => str_replace('\'', '"', $sdata->genre)
 //         ];
-//         DB::update("UPDATE songs_data SET song_id = :song_id WHERE id = :id", $updated);
+//         DB::update("UPDATE songs_data SET genre = :genre WHERE song_id = :id", $updated);
 //     }
 // });
 
