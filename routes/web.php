@@ -14,13 +14,11 @@ function slugify($string, $delimiter = '-') {
 }
 
 $router->get('/', function () use ($router) {
-    // $results = DB::select("SELECT * FROM songs");
-
     return response(["success" => true, "status" => 200]);
 });
 
 $router->get('/songs', function () use ($router) {
-    $results = DB::select("SELECT performer, song, song_id FROM songs");
+    $results = DB::select("SELECT performer, song, song_id FROM songs GROUP BY song_id");
 
     // foreach ($results as $song) {
     //     $song->song_id = slugify(preg_replace('/(?<!\ )[A-Z]/', ' $0', $song->song_id));
