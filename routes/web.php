@@ -96,7 +96,7 @@ $router->get('/genres/search/{query}', function ($query) use ($router) { // genr
  */
 
 $router->get('/bpm/{value}/songs', function ($value) use ($router) { // genres better be sanitized
-    $req = DB::select("SELECT performer, song, song_id FROM songs_data WHERE tempo = ?", [$value]);
+    $req = DB::select("SELECT performer, song, song_id FROM songs_data WHERE tempo >= ? AND tempo <= ?", [(int)$value - 5, (int)$value + 5]);
 
     return response($req);
 });

@@ -38,6 +38,6 @@ Setup:
 
 `/genres/search/{query}`: search a specific genre by name
 
-`/bpm/{value}/songs`: list song_id, performer, name *as song* from songs with specific bpm
+`/bpm/{value}/songs`: list song_id, performer, name *as song* from songs with specific bpm (+/- 5)
 
 `/average`: computed values
